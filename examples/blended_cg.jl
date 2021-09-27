@@ -16,9 +16,9 @@ Random.seed!(s)
 
 
 matrix = rand(n, n)
-hessian = transpose(matrix) * matrix
-linear = rand(n)
-f(x) = dot(linear, x) + 0.5 * transpose(x) * hessian * x
+const hessian = transpose(matrix) * matrix
+const linear = rand(n)
+f(x) = dot(linear, x) + 0.5 * dot(x, hessian, x)
 function grad!(storage, x)
     return storage .= linear + hessian * x
 end
