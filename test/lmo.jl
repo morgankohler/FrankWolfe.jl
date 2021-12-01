@@ -1,9 +1,11 @@
 using Test
 using FrankWolfe
+# include("/home/Morgan/FrankWolfe.jl/src/FrankWolfe.jl")
 using LinearAlgebra
 import SparseArrays
 
 import FrankWolfe: compute_extreme_point, LpNormLMO, KSparseLMO
+# include("/home/Morgan/FrankWolfe.jl/src/norm_oracles.jl")
 
 import GLPK
 import MathOptInterface

@@ -247,7 +247,7 @@ function frank_wolfe_2var(
     callback=nothing,
     timeout=Inf,
     print_callback=print_callback,
-)
+    )
 
     # format string for output of the algorithm
     format_string = "%6s %13s %14e %14e %14e %14e %14e\n"
@@ -327,6 +327,8 @@ function frank_wolfe_2var(
     gtemp_p = similar(x)
 
     gtemp = Nothing
+    momentum_x = Nothing
+    momentum_p = Nothing
 
     while t <= max_iteration # && dual_gap >= max(epsilon, eps())
 
@@ -352,11 +354,11 @@ function frank_wolfe_2var(
         #####################
 
 
-        if momentum === nothing || first_iter
+        if momentum_x === nothing || first_iter
             grad!(gradient, x, p)
             gradient_x = gradient[1]
             gradient_p = gradient[2]
-            if momentum !== nothing
+            if momentum_x !== nothing
                 gtemp_x .= gradient[1]
                 gtemp_p .= gradient[2]
             end
@@ -385,10 +387,30 @@ function frank_wolfe_2var(
         @emphasis(emphasis, d_x = x - v_x)
         @emphasis(emphasis, d_p = p - v_p)
 
-        f_x = (x_local) -> f(x_local, p)
-        f_p = (p_local) -> f(x, p_local)
-        g_x = (grad_local, x_local) -> grad!(grad_local, x_local, p)
-        g_p = (grad_local, p_local) -> grad!(grad_local, x, p_local)
+        function g_x(grad, x_local)
+            grad_local = Nothing
+            grad!(grad_local, x_local, p)
+            return @. grad = grad_local[1]
+        end
+
+        function g_p(grad, p_local)
+            grad_local = Nothing
+            grad!(grad_local, x, p_local)
+            return @. grad = grad_local[2]
+        end
+
+        function f_x(x_local)
+            return f(x_local, p)
+        end
+
+        function f_x(p_local)
+            return f(x, p_local)
+        end
+
+#         f_x = (x_local) -> f(x_local, p)
+#         f_p = (p_local) -> f(x, p_local)
+#         g_x = (grad_local, x_local) -> grad!(grad_local, x_local, p)
+#         g_p = (grad_local, p_local) -> grad!(grad_local, x, p_local)
 
         gamma_x, L_x = line_search_wrapper(
             line_search,

@@ -58,59 +58,6 @@ function line_search_wrapper(
 end
 
 
-function line_search_wrapper_new(
-    line_search,
-    t,
-    f,
-    grad!,
-    x,
-    d,
-    gradient,
-    dual_gap,
-    L,
-    gamma0,
-    linesearch_tol,
-    step_lim,
-    gamma_max,
-    grad_idx,
-)
-    if line_search isa Agnostic
-        gamma = 2 // (2 + t)
-    elseif line_search isa Goldenratio # FIX for general d
-        gamma, _ = segment_search(
-            f,
-            grad!,
-            x,
-            d,
-            gamma_max,
-            linesearch_tol=linesearch_tol,
-            inplace_gradient=true,
-        )
-    elseif line_search isa Backtracking # FIX for general d
-        gamma, _ = backtrackingLS(
-            f,
-            gradient,
-            x,
-            d,
-            gamma_max,
-            linesearch_tol=linesearch_tol,
-            step_lim=step_lim,
-        )
-    elseif line_search isa Nonconvex
-        gamma = 1 / sqrt(t + 1)
-    elseif line_search isa Shortstep
-        gamma = min(max(fast_dot(gradient, d) * inv(L * norm(d)^2), 0), gamma_max)
-    elseif line_search isa RationalShortstep
-        gamma = min(max(fast_dot(gradient, d) * inv(L * fast_dot(d, d)), 0), gamma_max)
-    elseif line_search isa FixedStep
-        gamma = min(gamma0, gamma_max)
-    elseif line_search isa Adaptive
-        gamma, L = adaptive_step_size(f, grad!, gradient, x, d, L, gamma_max=gamma_max)
-    end
-    return gamma, L
-end
-
-
 """
 Slight modification of
 Adaptive Step Size strategy from https://arxiv.org/pdf/1806.05123.pdf

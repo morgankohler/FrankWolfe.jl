@@ -1,7 +1,13 @@
+using Pkg
+Pkg.activate("/home/Morgan/FrankWolfe.jl")
+
+
 using FrankWolfe
 using Test
 using LinearAlgebra
 using DoubleFloats
+
+# include("/home/Morgan/FrankWolfe.jl/src/FrankWolfe.jl")
 
 include("lmo.jl")
 include("function_gradient.jl")

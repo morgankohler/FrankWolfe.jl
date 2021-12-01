@@ -1,4 +1,6 @@
 import Arpack
+# include("/home/Morgan/FrankWolfe.jl/src/oracles.jl")
+# include("/home/Morgan/FrankWolfe.jl/src/types.jl")
 
 """
     LpNormLMO{T, p}(right_hand_side)
@@ -8,6 +10,7 @@ LMO with feasible set being a bound on the L-p norm:
 C = {x ∈ R^n, norm(x, p) ≤ right_hand_side}
 ```
 """
+
 struct LpNormLMO{T,p} <: LinearMinimizationOracle
     right_hand_side::T
 end
