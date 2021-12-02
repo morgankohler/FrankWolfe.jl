@@ -20,7 +20,7 @@ import Hungarian
 import Arpack
 using DoubleFloats
 
-export frank_wolfe, lazified_conditional_gradient, away_frank_wolfe
+export frank_wolfe, lazified_conditional_gradient, away_frank_wolfe, frank_wolfe_2var
 export blended_conditional_gradient, compute_extreme_point
 
 include("defs.jl")

@@ -1,3 +1,6 @@
+using Pkg
+Pkg.activate("/home/Morgan/FrankWolfe.jl")
+
 using Test
 using FrankWolfe
 # include("/home/Morgan/FrankWolfe.jl/src/FrankWolfe.jl")

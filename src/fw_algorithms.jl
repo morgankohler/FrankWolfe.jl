@@ -226,7 +226,8 @@ end
 
 function frank_wolfe_2var(
     f,
-    grad!,
+    grad_x!,
+    grad_p!,
     lmo_x,
     lmo_p,
     x0,  # this is s0
@@ -235,7 +236,6 @@ function frank_wolfe_2var(
     L=Inf,
     gamma0=0,
     step_lim=20,
-    momentum=nothing,
     epsilon=1e-7,
     max_iteration=10000,
     print_iter=1000,
@@ -243,11 +243,16 @@ function frank_wolfe_2var(
     verbose=false,
     linesearch_tol=1e-7,
     emphasis::Emphasis=memory,
-    gradient=nothing,
     callback=nothing,
     timeout=Inf,
     print_callback=print_callback,
     )
+
+    gradient_x = nothing
+    gradient_p = nothing
+
+    momentum_x = nothing
+    momentum_p = nothing
 
     # format string for output of the algorithm
     format_string = "%6s %13s %14e %14e %14e %14e %14e\n"
@@ -278,7 +283,7 @@ function frank_wolfe_2var(
         println("FATAL: gamma0 not set. We are not going to move a single bit.")
     end
 
-    if (!isnothing(momentum) && line_search isa Union{Shortstep,Adaptive,RationalShortstep})
+    if (!isnothing(momentum_x) && line_search isa Union{Shortstep,Adaptive,RationalShortstep})
         println(
             "WARNING: Momentum-averaged gradients should usually be used with agnostic stepsize rules.",
         )
@@ -290,8 +295,8 @@ function frank_wolfe_2var(
         println(
             "EMPHASIS: $emphasis STEPSIZE: $line_search EPSILON: $epsilon MAXITERATION: $max_iteration TYPE: $numType",
         )
-        grad_type = typeof(gradient)
-        println("MOMENTUM: $momentum GRADIENTTYPE: $grad_type")
+        grad_type = typeof(gradient_x)
+        println("MOMENTUM: $momentum_x GRADIENTTYPE: $grad_type")
         if emphasis === memory
             println("WARNING: In memory emphasis mode iterates are written back into x0!")
         end
@@ -318,17 +323,21 @@ function frank_wolfe_2var(
     # instanciating container for gradient
 
     gradient_x = similar(x)
-    gradient_p = similar(x)
+    gradient_p = similar(p)
 
-    # container for direction
     d_x = similar(x)
-    d_p = similar(x)
-    gtemp_x = similar(x)
-    gtemp_p = similar(x)
+    gtemp_x = if momentum_x === nothing
+        nothing
+    else
+        similar(x)
+    end
 
-    gtemp = Nothing
-    momentum_x = Nothing
-    momentum_p = Nothing
+    d_p = similar(p)
+    gtemp_p = if momentum_p === nothing
+        nothing
+    else
+        similar(p)
+    end
 
     while t <= max_iteration # && dual_gap >= max(epsilon, eps())
 
@@ -353,19 +362,17 @@ function frank_wolfe_2var(
 
         #####################
 
-
         if momentum_x === nothing || first_iter
-            grad!(gradient, x, p)
-            gradient_x = gradient[1]
-            gradient_p = gradient[2]
+            grad_x!(gradient_x, x, p)
+            grad_p!(gradient_p, x, p)
             if momentum_x !== nothing
-                gtemp_x .= gradient[1]
-                gtemp_p .= gradient[2]
+                gtemp_x .= gradient_x
+                gtemp_p .= gradient_p
             end
         else
-            grad!(gtemp, x, p)
-            gtemp_x = gtemp[1]
-            gtemp_p = gtemp[2]
+            grad_x!(gtemp_x, x, p)
+            grad_p!(gtemp_p, x, p)
+
             @emphasis(emphasis, gradient_x = (momentum_x * gradient_x) + (1 - momentum_x) * gtemp_x)
             @emphasis(emphasis, gradient_p = (momentum_p * gradient_p) + (1 - momentum_p) * gtemp_p)
         end
@@ -388,22 +395,22 @@ function frank_wolfe_2var(
         @emphasis(emphasis, d_p = p - v_p)
 
         function g_x(grad, x_local)
-            grad_local = Nothing
-            grad!(grad_local, x_local, p)
-            return @. grad = grad_local[1]
+            grad_local = similar(grad)
+            grad_x!(grad_local, x_local, p)
+            return @. grad = grad_local
         end
 
         function g_p(grad, p_local)
-            grad_local = Nothing
-            grad!(grad_local, x, p_local)
-            return @. grad = grad_local[2]
+            grad_local = similar(grad)
+            grad_p!(grad_local, x, p_local)
+            return @. grad = grad_local
         end
 
         function f_x(x_local)
             return f(x_local, p)
         end
 
-        function f_x(p_local)
+        function f_p(p_local)
             return f(x, p_local)
         end
 
