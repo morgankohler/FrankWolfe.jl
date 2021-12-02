@@ -14,7 +14,7 @@ else
 end
 # input validation
 while !isdir(joinpath(@__DIR__, subdir))
-    print("Invalid directory $subdir. Please enter sub directory to run RDE in: ")
+    print("Invalid directory $subdir. Please enter sub directory to run RDE in:")
     global subdir = readline()
 end
 
@@ -112,6 +112,8 @@ for idx in indices
         if fw_arguments.line_search isa FrankWolfe.MonotonousNonConvexStepSize
             fw_arguments.line_search.factor = 0
         end
+
+        rde.print_model_prediction(x, s, p)
 
         # Store single rate result
         all_s[indexin(rate, rates)[1], :] = s

@@ -38,6 +38,15 @@ def store_single_result(mapping, name, fname, rate):
 
     # np.save(f'/home/Morgan/fw-rde/mnist/results/{name}.npy', mapping)
 
+    # print(np.max(mapping))
+    # print(np.min(mapping))
+
+    mapping = mapping - np.min(mapping)
+    mapping = mapping / np.max(mapping)
+
+    # for row in mapping:
+    #     print(row)
+
     plt.imsave(
         os.path.join(
             savedir,
@@ -45,8 +54,8 @@ def store_single_result(mapping, name, fname, rate):
         ),
         mapping.squeeze(),
         cmap='Greys',
-        vmin=np.min(mapping),
-        vmax=np.max(mapping),
+        vmin=0,
+        vmax=1,
         format='png',
     )
 
@@ -69,13 +78,13 @@ def store_pert_img(x, s, p, name, fname, rate):
     plt.imsave(
         os.path.join(
             savedir,
-            f'{name}.png'
+            f'{name}.jpg'
         ),
         x.squeeze(),
         cmap='Greys',
         vmin=np.min(x),
         vmax=np.max(x),
-        format='png',
+        format='jpg',
     )
 
 
@@ -92,7 +101,8 @@ def get_distortion(x, model=model, mode=MODE):
     node = np.argpartition(pred[0, ...], -2)[-1]
     # target = pred[0, node]
 
-    network_input = x + s_tensor * p_tensor
+    unprocessed = x + s_tensor * p_tensor
+    network_input = (tf.tanh((unprocessed + 37.96046)/255 * 2 - 1) + 1) / 2 * 255 - 37
     out = model(network_input)
     if mode == 'joint_untargeted':
         loss = tf.squeeze(out[..., node])
@@ -109,6 +119,51 @@ def get_distortion(x, model=model, mode=MODE):
 
     return lambda s, p: f_out([s, p])[0], lambda s, p: f_gradient([s, p])[0][0], lambda s, p: f_gradient([s, p])[0][1], node, pred
 
+
+def print_model_prediction(x, s, p):
+    print('\n------------------------\n')
+    print(np.max(x))
+    print(np.min(x))
+    print('\n------------------------\n')
+    print(np.max(s))
+    print(np.min(s))
+    print('\n------------------------\n')
+    print(np.max(p))
+    print(np.min(p))
+    print('\n------------------------\n')
+    s = np.reshape(s, x.shape)
+    p = np.reshape(p, x.shape)
+
+    pert_input = x + s * p
+
+    print(np.max(pert_input))
+    print(np.min(pert_input))
+    print('\n------------------------\n')
+    # for t in [x, pert_input]:
+    #     print('\n\n\n\n')
+    #     for row in t:
+    #         print(row)
+
+    # raise(Exception)
+
+    # s = tf.reshape(s, x.shape)
+    # p = tf.reshape(p, x.shape)
+
+    # pert_input = x+s*p
+    pert_input = tf.convert_to_tensor(pert_input)
+    pert_input = (tf.tanh((pert_input + 37.96046) / 255 * 2 - 1) + 1) / 2 * 255 - 37
+
+    print(tf.reduce_max(pert_input))
+    print(tf.reduce_min(pert_input))
+
+    pert_input[pert_input < -37.96046] = -37.96046
+    pert_input[pert_input > 255-37.96046] = 255-37.96046
+
+    pred0 = model.predict(x, steps=1)
+    pred1 = model.predict(pert_input, steps=1)
+
+    print(f'orig pred: {pred0}')
+    print(f'pert pred: {pred1}')
 
 # x, fname = get_data_sample(0)
 #

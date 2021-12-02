@@ -1,7 +1,7 @@
 indices = 0:49
 rates = [784]
 d = 25
-max_iter = 1000
+max_iter = 100
 
 fw_arguments = (
     line_search=FrankWolfe.MonotonousNonConvexStepSize(),

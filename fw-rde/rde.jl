@@ -1,5 +1,7 @@
+# using Pkg
+# Pkg.activate(@__DIR__)
 using Pkg
-Pkg.activate(@__DIR__)
+Pkg.activate("/home/Morgan/FrankWolfe.jl")
 
 # parse command line arguments if given
 if length(ARGS) > 0

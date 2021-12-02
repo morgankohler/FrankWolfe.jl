@@ -63,6 +63,12 @@ def store_test(x, fname):
     # print(type(x))
     # print(x.shape)
     # raise Exception
+
+    for row in x:
+        print(row)
+
+    raise Exception
+
     plt.imsave(
         os.path.join(
             savedir,
