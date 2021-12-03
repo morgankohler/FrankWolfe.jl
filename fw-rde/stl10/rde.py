@@ -110,7 +110,10 @@ def get_distortion(x, mean=mean, covariance=covariance, model=model,
     print(c_tensor.shape)
 
     s_flat = tf.placeholder(tf.float32, (np.prod(x_tensor.shape),))
+    print(s_flat.shape)
     s_tensor = tf.reshape(s_flat, x.shape)
+    print(s_tensor.shape)
+    raise Exception
     pred = model.predict(x)
     node = np.argpartition(pred[0, ...], -2)[-1]
     target = pred[0, node]

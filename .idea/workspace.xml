@@ -2,10 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e6df1b91-81b8-44a1-bd0c-528598eeb880" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/fw-rde/stl10/rde_new.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fw-rde/mnist/config.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/mnist/config.jl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/mnist/rde_new.py" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/mnist/rde_new.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fw-rde/rde.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/rde.jl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/rde_new.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/rde_new.jl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fw-rde/stl10/config.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/stl10/config.jl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fw-rde/stl10/rde.py" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/stl10/rde.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,7 +42,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/fw-rde" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/fw-rde/stl10" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -47,10 +50,11 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="web.server" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\dev\FrankWolfe.jl\fw-rde\stl10" />
       <recent name="C:\dev\FrankWolfe.jl\fw-rde" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -128,43 +132,28 @@
       <workItem from="1638371480858" duration="28912000" />
       <workItem from="1638475719846" duration="277000" />
       <workItem from="1638476014503" duration="5169000" />
+      <workItem from="1638546410812" duration="11447000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="421" y="97" key="FileChooserDialogImpl" timestamp="1638476399687">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="421" y="97" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1638476399687" />
-    <state x="142" y="0" key="SettingsEditor" timestamp="1638476415735">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="142" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1638476415735" />
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/fw-rde/mnist/rde_new.py</url>
-          <line>186</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fw-rde/mnist/rde.py</url>
           <line>197</line>
@@ -179,7 +168,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/FrankWolfe_jl$rde.coverage" NAME="rde Coverage Results" MODIFIED="1638387571451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fw-rde/mnist" />
     <SUITE FILE_PATH="coverage/FrankWolfe_jl$rde_new.coverage" NAME="rde_new Coverage Results" MODIFIED="1638387936417" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fw-rde/mnist" />
+    <SUITE FILE_PATH="coverage/FrankWolfe_jl$rde.coverage" NAME="rde Coverage Results" MODIFIED="1638387571451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fw-rde/mnist" />
   </component>
 </project>

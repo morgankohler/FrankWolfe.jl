@@ -32,7 +32,7 @@ for idx in indices
 
     # Load data sample and distortion functional
     x, fname = rde.get_data_sample(idx)
-    rde.store_test(x, "untargeted_ktest")
+#     rde.store_test(x, "untargeted_ktest")
 
     f, df, node, pred = rde.get_distortion(x)
 

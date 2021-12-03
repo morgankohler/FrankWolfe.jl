@@ -9,7 +9,7 @@ import instances
 
 # GENERAL PARAMETERS
 MODE = 'joint_untargeted'
-IMG_SHAPE = [28, 28]
+IMG_SHAPE = [224, 224, 3]
 
 # LOAD MODEL
 model = load_model()
@@ -29,6 +29,8 @@ def store_single_result(mapping, name, fname, rate, d, subdir):
     os.makedirs(savedir, exist_ok=True)
     # print(mapping.shape)
     mapping = np.reshape(mapping, IMG_SHAPE)
+    mapping = mapping.squeeze()
+    mapping = mapping[:,:,::-1]
     # for line in mapping:
     #     print(line)
     # raise Exception
@@ -38,11 +40,20 @@ def store_single_result(mapping, name, fname, rate, d, subdir):
 
     # np.save(f'/home/Morgan/fw-rde/mnist/results/{name}.npy', mapping)
 
+    # print('\n------------------------\n')
     # print(np.max(mapping))
     # print(np.min(mapping))
+    # print(mapping.shape)
+    # print('\n------------------------\n')
 
-    # mapping = mapping - np.min(mapping)
-    # mapping = mapping / np.max(mapping)
+    mapping = mapping - np.min(mapping)
+    mapping = mapping / np.max(mapping)
+
+    # print('\n------------------------\n')
+    # print(np.max(mapping))
+    # print(np.min(mapping))
+    # print(mapping.shape)
+    # print('\n------------------------\n')
 
     # for row in mapping:
     #     print(row)
@@ -52,8 +63,8 @@ def store_single_result(mapping, name, fname, rate, d, subdir):
             savedir,
             f'{name}_rate-{rate}_d-{d}.png'
         ),
-        mapping.squeeze(),
-        cmap='Greys',
+        mapping,
+        # cmap='Greys',
         vmin=np.min(mapping),
         vmax=np.max(mapping),
         format='png',
@@ -68,10 +79,15 @@ def store_pert_img(x, s, p, name, fname, rate, d, subdir):
     s = np.reshape(s, IMG_SHAPE)
     p = np.reshape(p, IMG_SHAPE)
 
-    x = x + s*p
+    pert_x = x + s*p
+    pert_x = pert_x.squeeze()
+    pert_x = pert_x[:,:,::-1]
     # for line in mapping:
     #     print(line)
     # raise Exception
+    pert_x = np.clip(pert_x, a_min=np.min(x), a_max=np.max(x))
+    pert_x = pert_x - np.min(pert_x)
+    pert_x = pert_x / np.max(pert_x)
 
     # np.save(f'/home/Morgan/fw-rde/mnist/results/{name}.npy', x)
 
@@ -80,10 +96,10 @@ def store_pert_img(x, s, p, name, fname, rate, d, subdir):
             savedir,
             f'{name}_rate-{rate}_d-{d}.png'
         ),
-        x.squeeze(),
-        cmap='Greys',
-        vmin=np.min(x),
-        vmax=np.max(x),
+        pert_x,
+        # cmap='Greys',
+        vmin=np.min(pert_x),
+        vmax=np.max(pert_x),
         format='jpg',
     )
 
@@ -122,24 +138,24 @@ def get_distortion(x, model=model, mode=MODE):
 
 
 def print_model_prediction(x, s, p):
-    print('\n------------------------\n')
-    print(np.max(x))
-    print(np.min(x))
-    print('\n------------------------\n')
-    print(np.max(s))
-    print(np.min(s))
-    print('\n------------------------\n')
-    print(np.max(p))
-    print(np.min(p))
-    print('\n------------------------\n')
+    # print('\n------------------------\n')
+    # print(np.max(x))
+    # print(np.min(x))
+    # print('\n------------------------\n')
+    # print(np.max(s))
+    # print(np.min(s))
+    # print('\n------------------------\n')
+    # print(np.max(p))
+    # print(np.min(p))
+    # print('\n------------------------\n')
     s = np.reshape(s, x.shape)
     p = np.reshape(p, x.shape)
 
     pert_input = x + s * p
 
-    print(np.max(pert_input))
-    print(np.min(pert_input))
-    print('\n------------------------\n')
+    # print(np.max(pert_input))
+    # print(np.min(pert_input))
+    # print('\n------------------------\n')
     # for t in [x, pert_input]:
     #     print('\n\n\n\n')
     #     for row in t:
@@ -159,11 +175,11 @@ def print_model_prediction(x, s, p):
     with sess.as_default():
         pert_input = pert_input.eval()
 
-    print('\n------------------------\n')
-    print(pert_input.shape)
-    print(np.max(pert_input))
-    print(np.min(pert_input))
-    print('\n------------------------\n')
+    # print('\n------------------------\n')
+    # print(pert_input.shape)
+    # print(np.max(pert_input))
+    # print(np.min(pert_input))
+    # print('\n------------------------\n')
 
     # pert_input[pert_input < -37.96046] = -37.96046
     # pert_input[pert_input > 255-37.96046] = 255-37.96046
@@ -171,8 +187,10 @@ def print_model_prediction(x, s, p):
     pred0 = model.predict(x, steps=1)
     pred1 = model.predict(pert_input, steps=1)
 
+    print('\n------------------------\n')
     print(f'orig pred: {pred0}')
     print(f'pert pred: {pred1}')
+    print('\n------------------------\n')
 
 # x, fname = get_data_sample(0)
 #
