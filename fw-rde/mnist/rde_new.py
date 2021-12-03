@@ -24,7 +24,7 @@ def get_data_sample(index):
     )
 
 
-def store_single_result(mapping, name, fname, rate):
+def store_single_result(mapping, name, fname, rate, d):
     savedir = os.path.join('results', fname)
     os.makedirs(savedir, exist_ok=True)
     # print(mapping.shape)
@@ -41,8 +41,8 @@ def store_single_result(mapping, name, fname, rate):
     # print(np.max(mapping))
     # print(np.min(mapping))
 
-    mapping = mapping - np.min(mapping)
-    mapping = mapping / np.max(mapping)
+    # mapping = mapping - np.min(mapping)
+    # mapping = mapping / np.max(mapping)
 
     # for row in mapping:
     #     print(row)
@@ -50,17 +50,17 @@ def store_single_result(mapping, name, fname, rate):
     plt.imsave(
         os.path.join(
             savedir,
-            f'{name}.png'
+            f'{name}_rate-{rate}_d-{d}.png'
         ),
         mapping.squeeze(),
         cmap='Greys',
-        vmin=0,
-        vmax=1,
+        vmin=np.min(mapping),
+        vmax=np.max(mapping),
         format='png',
     )
 
 
-def store_pert_img(x, s, p, name, fname, rate):
+def store_pert_img(x, s, p, name, fname, rate, d):
     savedir = os.path.join('results', fname)
     os.makedirs(savedir, exist_ok=True)
     # print(mapping.shape)
@@ -78,7 +78,7 @@ def store_pert_img(x, s, p, name, fname, rate):
     plt.imsave(
         os.path.join(
             savedir,
-            f'{name}.jpg'
+            f'{name}_rate-{rate}_d-{d}.png'
         ),
         x.squeeze(),
         cmap='Greys',
@@ -102,7 +102,8 @@ def get_distortion(x, model=model, mode=MODE):
     # target = pred[0, node]
 
     unprocessed = x + s_tensor * p_tensor
-    network_input = (tf.tanh((unprocessed + 37.96046)/255 * 2 - 1) + 1) / 2 * 255 - 37
+    # network_input = (tf.tanh((unprocessed + 37.96046)/255 * 2 - 1) + 1) / 2 * 255 - 37
+    network_input = tf.clip_by_value(unprocessed, clip_value_min=-37.96046, clip_value_max=255-37.96046)
     out = model(network_input)
     if mode == 'joint_untargeted':
         loss = tf.squeeze(out[..., node])
@@ -151,13 +152,21 @@ def print_model_prediction(x, s, p):
 
     # pert_input = x+s*p
     pert_input = tf.convert_to_tensor(pert_input)
-    pert_input = (tf.tanh((pert_input + 37.96046) / 255 * 2 - 1) + 1) / 2 * 255 - 37
+    # pert_input = (tf.tanh((pert_input + 37.96046) / 255 * 2 - 1) + 1) / 2 * 255 - 37
+    pert_input = tf.clip_by_value(pert_input, clip_value_min=-37.96046, clip_value_max=255-37.96046)
 
-    print(tf.reduce_max(pert_input))
-    print(tf.reduce_min(pert_input))
+    sess = tf.Session()
+    with sess.as_default():
+        pert_input = pert_input.eval()
 
-    pert_input[pert_input < -37.96046] = -37.96046
-    pert_input[pert_input > 255-37.96046] = 255-37.96046
+    print('\n------------------------\n')
+    print(pert_input.shape)
+    print(np.max(pert_input))
+    print(np.min(pert_input))
+    print('\n------------------------\n')
+
+    # pert_input[pert_input < -37.96046] = -37.96046
+    # pert_input[pert_input > 255-37.96046] = 255-37.96046
 
     pred0 = model.predict(x, steps=1)
     pred1 = model.predict(pert_input, steps=1)

@@ -35,7 +35,7 @@ for idx in indices
     # Load data sample and distortion functional
     x, fname = rde.get_data_sample(idx)
 #     rde.store_test(x, "untargeted_ktest")
-    rde.store_single_result(x, "xb4", "untargeted_2var_testd25", 0)
+    rde.store_single_result(x, "xb4", "untargeted_2var_testd25", 0, d)
 
 #     print(x)
 #     throw(ErrorException)
@@ -118,10 +118,10 @@ for idx in indices
         # Store single rate result
         all_s[indexin(rate, rates)[1], :] = s
         # rde.store_single_result(s, idx, fname, rate)
-        rde.store_single_result(s, "s", "untargeted_2var_testd25", rate)
-        rde.store_single_result(p, "p", "untargeted_2var_testd25", rate)
-        rde.store_single_result(x, "x", "untargeted_2var_testd25", rate)
-        rde.store_pert_img(x, s, p, "pertimg", "untargeted_2var_testd25", rate)
+        rde.store_single_result(s, "s", "untargeted_2var_testd25", rate, d)
+        rde.store_single_result(p, "p", "untargeted_2var_testd25", rate, d)
+        rde.store_single_result(x, "x", "untargeted_2var_testd25", rate, d)
+        rde.store_pert_img(x, s, p, "pertimg", "untargeted_2var_testd25", rate, d)
 
         # rde.store_test(s, "untargeted_test")
         

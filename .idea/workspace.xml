@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e6df1b91-81b8-44a1-bd0c-528598eeb880" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/FrankWolfe.jl.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FrankWolfe.jl.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/mnist/config.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/mnist/config.jl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fw-rde/mnist/rde.py" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/mnist/rde.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/mnist/rde_new.py" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/mnist/rde_new.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fw-rde/rde.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/rde.jl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/rde_new.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/rde_new.jl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -130,29 +126,43 @@
       <workItem from="1638290884446" duration="22000" />
       <workItem from="1638290921250" duration="11419000" />
       <workItem from="1638371480858" duration="28912000" />
+      <workItem from="1638475719846" duration="277000" />
+      <workItem from="1638476014503" duration="5169000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
+    <option name="version" value="1" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
     </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="421" y="97" key="FileChooserDialogImpl" timestamp="1638476399687">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="421" y="97" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1638476399687" />
+    <state x="142" y="0" key="SettingsEditor" timestamp="1638476415735">
+      <screen x="0" y="0" width="1280" height="680" />
+    </state>
+    <state x="142" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1638476415735" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/fw-rde/mnist/rde_new.py</url>
-          <line>177</line>
+          <line>186</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -169,7 +179,7 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/FrankWolfe_jl$rde_new.coverage" NAME="rde_new Coverage Results" MODIFIED="1638387936417" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fw-rde/mnist" />
     <SUITE FILE_PATH="coverage/FrankWolfe_jl$rde.coverage" NAME="rde Coverage Results" MODIFIED="1638387571451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fw-rde/mnist" />
+    <SUITE FILE_PATH="coverage/FrankWolfe_jl$rde_new.coverage" NAME="rde_new Coverage Results" MODIFIED="1638387936417" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fw-rde/mnist" />
   </component>
 </project>
