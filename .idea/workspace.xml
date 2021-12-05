@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e6df1b91-81b8-44a1-bd0c-528598eeb880" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/fw-rde/gen_test_imgs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fw-rde/rde.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/rde.jl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/rde_new.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/rde_new.jl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/stl10/config.jl" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/stl10/config.jl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fw-rde/stl10/rde_new.py" beforeDir="false" afterPath="$PROJECT_DIR$/fw-rde/stl10/rde_new.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fw_algorithms.jl" beforeDir="false" afterPath="$PROJECT_DIR$/src/fw_algorithms.jl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,7 +153,7 @@
       <workItem from="1638371480858" duration="28912000" />
       <workItem from="1638475719846" duration="277000" />
       <workItem from="1638476014503" duration="5169000" />
-      <workItem from="1638546410812" duration="33499000" />
+      <workItem from="1638546410812" duration="36212000" />
     </task>
     <servers />
   </component>

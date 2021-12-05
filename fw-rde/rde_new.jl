@@ -31,6 +31,7 @@ cd(subdir)
 rde = pyimport("rde_new")
 
 success = 0
+norm_sum = 0
 
 for idx in indices
 
@@ -42,7 +43,7 @@ for idx in indices
 #     print(x)
 #     throw(ErrorException)
 
-    f, df_s, df_p, node, target_node = rde.get_distortion(x, mode=mode)
+    f, df_s, df_p, node, target_node = rde.get_distortion(x, mode=mode, optim=optim)
 
     # Wrap objective and gradiet functions
     function func(s, p)
@@ -115,14 +116,17 @@ for idx in indices
             fw_arguments.line_search.factor = 0
         end
 
-        global success += rde.get_model_prediction(x, s, p, node, target_node, mode)
+        iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim)
+
+        global success += iter_success
+        global norm_sum += iter_norm
 
         # Store single rate result
         all_s[indexin(rate, rates)[1], :] = s
         # rde.store_single_result(s, idx, fname, rate)
         rde.store_s(s, fname, rate, d, test_name)
         rde.store_single_result(p, "p", fname, rate, d, test_name)
-        rde.store_pert_img(x, s, p, fname, rate, d, test_name)
+        rde.store_pert_img(x, s, p, fname, rate, d, test_name, optim)
     end
 
     if save_imp
@@ -135,4 +139,5 @@ for idx in indices
 end
 
 success = success / length(indices)
-println("\naccuracy: $success")
+norm_avg = norm_sum / length(indices)
+println("\naccuracy: $success | avg L1 norm: $norm_avg")

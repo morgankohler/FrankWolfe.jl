@@ -3,9 +3,10 @@ indices = 3786 #0:7999
 rates = [8000]
 d = 12.75
 max_iter = 20
-mode = "joint_targeted"
+mode = "targeted"
+optim = "joint" #"univariate"
 save_imp = false
-test_name = "targeted_test_1"
+test_name = "univariate_untargeted_test"
 
 fw_arguments = (
     line_search=FrankWolfe.MonotonousNonConvexStepSize(),

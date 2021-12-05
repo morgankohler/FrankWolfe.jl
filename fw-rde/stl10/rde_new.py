@@ -74,7 +74,7 @@ def store_s(s, fname, rate, d, test_name):
     )
 
 
-def store_pert_img(x, s, p, fname, rate, d, test_name):
+def store_pert_img(x, s, p, fname, rate, d, test_name, optim):
     if rate == 0:
         savedir = os.path.join('results', test_name, fname)
     else:
@@ -85,17 +85,19 @@ def store_pert_img(x, s, p, fname, rate, d, test_name):
     s = np.reshape(s, IMG_SHAPE)
     p = np.reshape(p, IMG_SHAPE)
 
-    pert_x = x + s*p
+    if optim == 'joint':
+        pert_x = x + s * p
+    elif optim == 'univariate':
+        pert_x = x + p
+    else:
+        raise Exception("optim not implemented")
+
     pert_x = pert_x.squeeze()
     pert_x = pert_x[:,:,::-1]
-    # for line in mapping:
-    #     print(line)
-    # raise Exception
+
     pert_x = np.clip(pert_x, a_min=np.min(x), a_max=np.max(x))
     pert_x = pert_x - np.min(pert_x)
     pert_x = pert_x / np.max(pert_x)
-
-    # np.save(f'/home/Morgan/fw-rde/mnist/results/{name}.npy', x)
 
     plt.imsave(
         os.path.join(
@@ -130,7 +132,7 @@ def store_saliency_importance(joint_s, rates, fname, d, test_name):
     )
 
 
-def get_distortion(x, model=model, mode=MODE):
+def get_distortion(x, model=model, mode=MODE, optim="joint"):
 
     x_tensor = tf.constant(x, dtype=tf.float32)
     s_flat = tf.placeholder(tf.float32, (np.prod(x_tensor.shape),))
@@ -143,40 +145,48 @@ def get_distortion(x, model=model, mode=MODE):
     node = np.argpartition(pred[0, ...], -2)[-1]
     # target = pred[0, node]
 
-    unprocessed = x + s_tensor * p_tensor
-    # network_input = (tf.tanh((unprocessed + 37.96046)/255 * 2 - 1) + 1) / 2 * 255 - 37
+    if optim == "joint":
+        unprocessed = x + s_tensor * p_tensor
+    elif optim == "univariate":
+        unprocessed = x + p_tensor + s_tensor*0
+    else:
+        raise Exception("optim not implemented")
+
     network_input = tf.clip_by_value(unprocessed, clip_value_min=np.min(x), clip_value_max=np.max(x))
     out = model(network_input)
-    if mode == 'joint_untargeted':
+    if mode == 'untargeted':
         target_node = None
         loss = tf.squeeze(out[..., node])
-    if mode == 'joint_targeted':
+    elif mode == 'targeted':
         class_li = list(range(10))
         class_li.remove(node)
         new_class = random.randint(0, 8)
         target_node = class_li[new_class]
         cel = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
         loss = cel([target_node], out)
+    else:
+        raise Exception("mode not implemented")
 
     gradient = K.gradients(loss, [s_flat, p_flat])
     f_out = K.function([s_flat, p_flat], [loss])
     f_gradient = K.function([s_flat, p_flat], [gradient])
 
-    # a = tf.random.uniform(shape=s_flat.shape)
-    # b = tf.random.uniform(shape=s_flat.shape)
-    #
-    # c = f_out([a, b])
-    # d = f_gradient([a, b])
-
     return lambda s, p: f_out([s, p])[0], lambda s, p: f_gradient([s, p])[0][0], lambda s, p: f_gradient([s, p])[0][1], node, target_node
 
 
-def get_model_prediction(x, s, p, node, target_node, mode):
+def get_model_prediction(x, s, p, node, target_node, mode, optim):
 
     s = np.reshape(s, x.shape)
     p = np.reshape(p, x.shape)
 
-    pert_input = x + s * p
+    if optim == 'joint':
+        norm = np.sum(np.abs(s*p))
+        pert_input = x + s * p
+    elif optim == 'univariate':
+        norm = np.sum(np.abs(p))
+        pert_input = x + p
+    else:
+        raise Exception("optim not implemented")
 
     pert_input = tf.convert_to_tensor(pert_input)
     pert_input = tf.clip_by_value(pert_input, clip_value_min=np.min(x), clip_value_max=np.max(x))
@@ -205,12 +215,12 @@ def get_model_prediction(x, s, p, node, target_node, mode):
               )
         print('\n------------------------\n')
 
-    if 'untargeted' in mode:
-        return int(node0 != node1)
-    elif 'targeted' in mode:
-        return int(target_node == node1)
+    if mode == 'untargeted':
+        return int(node0 != node1), norm
+    elif mode == 'targeted':
+        return int(target_node == node1), norm
     else:
-        return 0
+        return 0, norm
 
 # x, fname = get_data_sample(0)
 #
