@@ -30,17 +30,19 @@ cd(subdir)
 # Get the Python side of RDE
 rde = pyimport("rde_new")
 
+success = 0
+
 for idx in indices
 
     # Load data sample and distortion functional
     x, fname = rde.get_data_sample(idx)
 #     rde.store_test(x, "untargeted_ktest")
-    rde.store_single_result(x, "xb4", "untargeted_2var_testd25", 0, d, subdir)
+    rde.store_single_result(x, "xb4", fname, 0, d, test_name)
 
 #     print(x)
 #     throw(ErrorException)
 
-    f, df_s, df_p, node, pred = rde.get_distortion(x)
+    f, df_s, df_p, node, target_node = rde.get_distortion(x, mode=mode)
 
     # Wrap objective and gradiet functions
     function func(s, p)
@@ -113,23 +115,24 @@ for idx in indices
             fw_arguments.line_search.factor = 0
         end
 
-        rde.print_model_prediction(x, s, p)
+        global success += rde.get_model_prediction(x, s, p, node, target_node, mode)
 
         # Store single rate result
         all_s[indexin(rate, rates)[1], :] = s
         # rde.store_single_result(s, idx, fname, rate)
-        rde.store_single_result(s, "s", "untargeted_2var_testd25", rate, d, subdir)
-        rde.store_single_result(p, "p", "untargeted_2var_testd25", rate, d, subdir)
-        rde.store_single_result(x, "x", "untargeted_2var_testd25", rate, d, subdir)
-        rde.store_pert_img(x, s, p, "pertimg", "untargeted_2var_testd25", rate, d, subdir)
-
-        # rde.store_test(s, "untargeted_test")
-        
+        rde.store_s(s, fname, rate, d, test_name)
+        rde.store_single_result(p, "p", fname, rate, d, test_name)
+        rde.store_pert_img(x, s, p, fname, rate, d, test_name)
     end
 
-    break
+    if save_imp
+        rde.store_saliency_importance(all_s, rates, fname, d, test_name)
+    end
 
     # Store multiple rate results
-    rde.store_collected_results(all_s, idx, node, pred, fname, rates)
+#     rde.store_collected_results(all_s, idx, node, pred, fname, rates)
 
 end
+
+success = success / length(indices)
+println("\naccuracy: $success")

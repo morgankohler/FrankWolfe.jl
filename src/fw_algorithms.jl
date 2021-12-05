@@ -255,7 +255,7 @@ function frank_wolfe_2var(
     momentum_p = nothing
 
     # format string for output of the algorithm
-    format_string = "%6s %13s %14e %14e %14e %14e %14e\n"
+    format_string = "%6s %13s %14e %14e %14e %14e %14e %14e %14e\n"
     gamma0_x = 0
     gamma0_p = 0
     L_x = Inf
@@ -300,7 +300,7 @@ function frank_wolfe_2var(
         if emphasis === memory
             println("WARNING: In memory emphasis mode iterates are written back into x0!")
         end
-        headers = ["Type", "Iteration", "Primal", "Dual", "Dual Gap", "Time", "It/sec"]
+        headers = ["Type", "Iteration", "Primal", "Dual s", "Dual Gap s", "Dual p", "Dual Gap p", "Time", "It/sec"]
         print_callback(headers, format_string, print_header=true)
     end
     if emphasis == memory && !isa(x, Union{Array,SparseArrays.AbstractSparseArray})
@@ -454,26 +454,26 @@ function frank_wolfe_2var(
             state_x = (
                 t=t,
                 primal=primal,
-                dual=primal - dual_gap_x,
-                dual_gap=dual_gap_p,
+                dual_x=primal - dual_gap_x,
+                dual_gap_x=dual_gap_x,
                 time=tot_time,
                 x=x,
-                v=v_x,
-                gamma=gamma_x,
+                v_x=v_x,
+                gamma_x=gamma_x,
             )
-            callback(state)
+            callback(state_x)
 
-            state = (
+            state_p = (
                 t=t,
                 primal=primal,
-                dual=primal - dual_gap_p,
+                dual_p=primal - dual_gap_p,
                 dual_gap=dual_gap_p,
                 time=tot_time,
-                x=p,
-                v=v_p,
-                gamma=gamma_p,
+                p=p,
+                v_p=v_p,
+                gamma_p=gamma_p,
             )
-            callback(state)
+            callback(state_p)
 
         end
 
@@ -490,6 +490,8 @@ function frank_wolfe_2var(
                 st[Symbol(tt)],
                 string(t),
                 Float64(primal),
+                Float64(primal - dual_gap_x),
+                Float64(dual_gap_x),
                 Float64(primal - dual_gap_p),
                 Float64(dual_gap_p),
                 tot_time,

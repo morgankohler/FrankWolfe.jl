@@ -90,8 +90,6 @@ for idx in indices
         
     end
 
-    break
-
     # Store multiple rate results
     rde.store_collected_results(all_s, idx, node, pred, fname, rates)
 
