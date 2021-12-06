@@ -166,7 +166,7 @@ class cifar10vgg:
         #     self.adf_model.load_weights('cifar10vgg.h5')
 
 
-    def build_model(self):
+    def build_model(self, softmax=False):
         # Build the network of vgg for 10 classes with massive dropout and weight decay as described in the paper.
 
         model = Sequential()
@@ -253,7 +253,8 @@ class cifar10vgg:
 
         model.add(Dropout(0.5))
         model.add(Dense(self.num_classes))
-        model.add(Activation('softmax'))
+        if softmax:
+            model.add(Activation('softmax'))
         return model
 
 
