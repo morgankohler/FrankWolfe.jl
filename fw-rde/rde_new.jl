@@ -1,5 +1,5 @@
 using Pkg
-Pkg.activate("/home/Morgan/FrankWolfe.jl")
+Pkg.activate("/home/tooba/JuliaProjects/recent-FW/FrankWolfe.jl")
 # Pkg.activate("/home/Morgan/FrankWolfe.jl/fw-rde")
 
 
@@ -42,8 +42,12 @@ for idx in indices
 
 #     print(x)
 #     throw(ErrorException)
-
-    f, df_s, df_p, node, target_node = rde.get_distortion(x, mode=mode, optim=optim)
+    cifar = true
+    if cifar
+        f, df_s, df_p, node, target_node, f_all = rde.get_distortion(x, mode=mode, optim=optim)
+    else
+        f, df_s, df_p, node, target_node = rde.get_distortion(x, mode=mode, optim=optim)
+    end
 
     # Wrap objective and gradiet functions
     function func(s, p)
@@ -116,7 +120,11 @@ for idx in indices
             fw_arguments.line_search.factor = 0
         end
 
-        iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim)
+        if cifar
+            iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim, f_all(s,p))
+        else
+            iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim)
+        end
 
         global success += iter_success
         global norm_sum += iter_norm

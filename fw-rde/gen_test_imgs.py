@@ -3,7 +3,7 @@ import os
 from PIL import Image
 import tqdm
 
-root = '/data/morgan'
+root = 'stl10/data'
 
 ds = torchvision.datasets.STL10(root=root, split='test')
 

@@ -1,5 +1,5 @@
 using Pkg
-Pkg.activate("/home/Morgan/FrankWolfe.jl")
+Pkg.activate("/home/tooba/JuliaProjects/recent-FW/FrankWolfe.jl")
 # Pkg.activate("/home/Morgan/FrankWolfe.jl/fw-rde")
 
 
