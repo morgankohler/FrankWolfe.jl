@@ -174,7 +174,7 @@ def get_distortion(x, model=model, mode=MODE, optim="joint"):
     return lambda s, p: f_out([s, p])[0], lambda s, p: f_gradient([s, p])[0][0], lambda s, p: f_gradient([s, p])[0][1], node, target_node
 
 
-def get_model_prediction(x, s, p, node, target_node, mode, optim):
+def get_model_prediction(x, s, p, node, target_node, mode, optim, logfname):
 
     s = np.reshape(s, x.shape)
     p = np.reshape(p, x.shape)
@@ -203,17 +203,29 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim):
 
     # pred0_logit = pred0[..., node0]
     # pred1_logit = pred1[..., node0]
+    labels = ["airplane","bird","car","cat","deer","dog","horse","monkey","ship","truck"]
 
     with tf.Session() as sess:
         print('\n------------------------\n')
-        print(f'orig pred cat: {node0} | ',
+        print(f'orig pred {labels[node0]}: {node0} | ',
               f'orig pred: {pred0_percent.eval()}% | ',
-              f'pert target cat: {target_node} | ',
-              f'pert pred cat: {node1} | ',
+              f'pert target {labels[target_node]}: {target_node} | ',
+              f'pert pred {labels[node1]}: {node1} | ',
               f'pert pred new class: {pred1_new_class_percent.eval()}% | ',
               f'pert pred old class: {pred1_old_class_percent.eval()}% | ',
               )
         print('\n------------------------\n')
+
+        if not os.path.exists("../logs"):
+            os.mkdir("../logs")
+    
+        with open(logfname, "a") as f:
+            f.write(f"\norig pred: {labels[node0]} ({node0})")
+            f.write(f"\norig pred: {pred0_percent.eval()}%")
+            f.write(f"\npert target: {labels[target_node]} ({target_node})")
+            f.write(f"\npert pred: {labels[node1]} ({node1})")
+            f.write(f"\npert pred new class: {pred1_new_class_percent.eval()}%")
+            f.write(f"\npert pred old class: {pred1_old_class_percent.eval()}% \n")
 
     if mode == 'untargeted':
         return int(node0 != node1), norm

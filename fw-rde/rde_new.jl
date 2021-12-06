@@ -30,6 +30,11 @@ cd(subdir)
 # Get the Python side of RDE
 rde = pyimport("rde_new")
 
+rate = rates
+idx0 = minimum(indices)
+idxl = maximum(indices)
+logfname = "../logs/$subdir-d-$d-rate-$rate-idx-$idx0:$idxl-max_iter-$max_iter-mode-$mode.txt"
+
 success = 0
 norm_sum = 0
 
@@ -42,7 +47,10 @@ for idx in indices
 
 #     print(x)
 #     throw(ErrorException)
-    cifar = true
+    cifar = false 
+    if subdir=="cifar10"
+        cifar = true 
+    end
     if cifar
         f, df_s, df_p, node, target_node, f_all = rde.get_distortion(x, mode=mode, optim=optim)
     else
@@ -121,9 +129,9 @@ for idx in indices
         end
 
         if cifar
-            iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim, f_all(s,p))
+            iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim, f_all(s,p), logfname)
         else
-            iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim)
+            iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim, logfname)
         end
 
         global success += iter_success
@@ -149,3 +157,9 @@ end
 success = success / length(indices)
 norm_avg = norm_sum / length(indices)
 println("\naccuracy: $success | avg L1 norm: $norm_avg")
+
+open(logfname, "a") do io
+    println(io, "\n *********************************** \n")
+    println(io, "\naccuracy: $success | avg L1 norm: $norm_avg \n")
+    println(io, "\n *********************************** \n")
+end

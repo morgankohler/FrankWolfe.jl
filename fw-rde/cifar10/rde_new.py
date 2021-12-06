@@ -170,6 +170,13 @@ def get_distortion(x, model=model, mode=MODE, optim="joint"):
         target_node = class_li[new_class]
         cel = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
         loss = cel([target_node], out)
+    elif mode == 'targeted-cw':
+        class_li = list(range(10))
+        class_li.remove(node)
+        new_class = random.randint(0, 8)
+        target_node = class_li[new_class]
+        cel = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        loss = cel([target_node], out)
     else:
         raise Exception("mode not implemented")
 
@@ -183,7 +190,7 @@ def get_distortion(x, model=model, mode=MODE, optim="joint"):
     return lambda s, p: f_out([s, p])[0], lambda s, p: f_gradient([s, p])[0][0], lambda s, p: f_gradient([s, p])[0][1], node, target_node, lambda s, p: f_out_all([s, p])
 
 
-def get_model_prediction(x, s, p, node, target_node, mode, optim, pred1):
+def get_model_prediction(x, s, p, node, target_node, mode, optim, pred1, logfname):
 
     s = np.reshape(s, x.shape)
     p = np.reshape(p, x.shape)
@@ -229,6 +236,14 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim, pred1):
               f'pert pred old class: {pred1_old_class_percent.eval()}% | ',
               )
         print('\n------------------------\n')
+
+        with open(logfname, "a") as f:
+            f.write(f"\norig pred: {labels[node0]} ({node0})")
+            f.write(f"\norig pred: {pred0_percent.eval()}%")
+            f.write(f"\npert target: {labels[target_node]} ({target_node})")
+            f.write(f"\npert pred: {labels[node1]} ({node1})")
+            f.write(f"\npert pred new class: {pred1_new_class_percent.eval()}%")
+            f.write(f"\npert pred old class: {pred1_old_class_percent.eval()}% \n")
 
     if mode == 'untargeted':
         return int(node0 != node1), norm
