@@ -205,8 +205,8 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim, pred1):
 
     pred1 = np.asarray([i.tolist() for i in pred1])
             
-    print(type(pred0))
-    print(type(pred1))
+    # print(type(pred0))
+    # print(type(pred1))
 
     node0 = np.argpartition(pred0[0, ...], -2)[-1]
     node1 = np.argpartition(pred1[0, ...], -2)[-1]
@@ -217,13 +217,14 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim, pred1):
 
     # pred0_logit = pred0[..., node0]
     # pred1_logit = pred1[..., node0]
+    labels = ['airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck']
 
     with tf.Session() as sess:
         print('\n------------------------\n')
-        print(f'orig pred cat: {node0} | ',
+        print(f'orig pred {labels[node0]}: {node0} | ',
               f'orig pred: {pred0_percent.eval()}% | ',
-              f'pert target cat: {target_node} | ',
-              f'pert pred cat: {node1} | ',
+              f'pert target {labels[target_node]}: {target_node} | ',
+              f'pert pred {labels[node1]}: {node1} | ',
               f'pert pred new class: {pred1_new_class_percent.eval()}% | ',
               f'pert pred old class: {pred1_old_class_percent.eval()}% | ',
               )
