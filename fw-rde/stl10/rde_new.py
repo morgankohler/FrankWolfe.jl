@@ -141,22 +141,24 @@ def get_distortion(x, model=model, mode=MODE, optim="joint"):
     p_flat = tf.placeholder(tf.float32, (np.prod(x_tensor.shape),))
     p_tensor = tf.reshape(p_flat, x.shape)
 
-    pred = model.predict(x)
+    pred = model.predict(x_tensor, steps=1)
     node = np.argpartition(pred[0, ...], -2)[-1]
     # target = pred[0, node]
-
-    if optim == "joint":
-        unprocessed = x + s_tensor * p_tensor
-    elif optim == "univariate":
-        unprocessed = x + p_tensor + s_tensor*0
-    else:
-        raise Exception("optim not implemented")
+    with tf.device("gpu"):
+        if optim == "joint":
+            unprocessed = x_tensor + s_tensor * p_tensor
+        elif optim == "univariate":
+            unprocessed = x_tensor + p_tensor + s_tensor*0
+        else:
+            raise Exception("optim not implemented")
 
     network_input = tf.clip_by_value(unprocessed, clip_value_min=np.min(x), clip_value_max=np.max(x))
     out = model(network_input)
     if mode == 'untargeted':
         target_node = None
-        loss = tf.squeeze(out[..., node])
+        # loss = tf.squeeze(out[..., node])
+        cel = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        loss = - cel([node], out)
     elif mode == 'targeted':
         class_li = list(range(10))
         class_li.remove(node)
@@ -212,6 +214,7 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim):
               f'pert pred cat: {node1} | ',
               f'pert pred new class: {pred1_new_class_percent.eval()}% | ',
               f'pert pred old class: {pred1_old_class_percent.eval()}% | ',
+              f'pert norm: {norm} | ',
               )
         print('\n------------------------\n')
 
@@ -221,6 +224,11 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim):
         return int(target_node == node1), norm
     else:
         return 0, norm
+
+
+def save_norm_acc(norm_li, acc_li, d_range, test_name):
+    norm_acc = np.stack((d_range, norm_li, acc_li), axis=1)
+    np.savetxt(os.path.join('results', test_name, 'normacc.txt'), norm_acc)
 
 # x, fname = get_data_sample(0)
 #

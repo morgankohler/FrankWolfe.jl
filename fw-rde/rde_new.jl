@@ -30,114 +30,136 @@ cd(subdir)
 # Get the Python side of RDE
 rde = pyimport("rde_new")
 
-success = 0
-norm_sum = 0
+acc_li = similar(d_range)
+norm_li = similar(d_range)
 
-for idx in indices
+for (d_idx, d) in enumerate(d_range)
 
-    # Load data sample and distortion functional
-    x, fname = rde.get_data_sample(idx)
-#     rde.store_test(x, "untargeted_ktest")
-    rde.store_single_result(x, "xb4", fname, 0, d, test_name)
+    print("\n-----------------------------------\n")
+    println("starting d_idx: $d_idx | d: $d")
+    print("\n-----------------------------------\n")
 
-#     print(x)
-#     throw(ErrorException)
+    success = 0
+    norm_sum = 0
 
-    f, df_s, df_p, node, target_node = rde.get_distortion(x, mode=mode, optim=optim)
+    for img_idx in indices
 
-    # Wrap objective and gradiet functions
-    function func(s, p)
-        if !(s isa Vector{eltype(x)})
-            s = convert(Vector{eltype(x)}, s)
+        print("\n-----------------------------------\n")
+        println("starting img_idx: $img_idx")
+        print("\n-----------------------------------\n")
+
+        # Load data sample and distortion functional
+        x, fname = rde.get_data_sample(img_idx)
+    #     rde.store_test(x, "untargeted_ktest")
+        rde.store_single_result(x, "xb4", fname, 0, d, test_name)
+
+    #     print(x)
+    #     throw(ErrorException)
+
+        f, df_s, df_p, node, target_node = rde.get_distortion(x, mode=mode, optim=optim)
+
+        # Wrap objective and gradiet functions
+        function func(s, p)
+            if !(s isa Vector{eltype(x)})
+                s = convert(Vector{eltype(x)}, s)
+            end
+            if !(p isa Vector{eltype(x)})
+                p = convert(Vector{eltype(x)}, p)
+            end
+            return f(s, p)
         end
-        if !(p isa Vector{eltype(x)})
-            p = convert(Vector{eltype(x)}, p)
+
+        function grad_s!(storage, s, p)
+            if !(s isa Vector{eltype(x)})
+                s = convert(Vector{eltype(x)}, s)
+            end
+            if !(p isa Vector{eltype(x)})
+                p = convert(Vector{eltype(x)}, p)
+            end
+            g = df_s(s, p)
+            return @. storage = g
         end
-        return f(s, p)
+
+        function grad_p!(storage, s, p)
+            if !(s isa Vector{eltype(x)})
+                s = convert(Vector{eltype(x)}, s)
+            end
+            if !(p isa Vector{eltype(x)})
+                p = convert(Vector{eltype(x)}, p)
+            end
+            g = df_p(s, p)
+            return @. storage = g
+        end
+
+        all_s = zeros(eltype(x), (length(rates), length(x)))
+
+        # rates = [50, 100, 150, 200, 250, 300, 350, 400, 1000, 2000]
+
+        for rate in rates
+            print("\n-----------------------------------\n")
+            println("Running sample $img_idx with rate $rate")
+            print("\n-----------------------------------\n")
+
+            s0 = similar(x[:])
+            s0 .= 0.0
+            lmo_s = NonNegKSparseLMO(rate, 1.0)
+
+            p0 = similar(x[:])
+            p0 .= 0.0
+            lmo_p = LpNormLMO{Float64,Inf}(d)
+
+            @time s, v_s, p, v_p, primal, dual_gap_s, dual_gap_p  = FrankWolfe.frank_wolfe_2var(
+            #@time s, v, primal, dual_gap = FrankWolfe.frank_wolfe(
+            #@time s, v, primal, dual_gap = FrankWolfe.away_frank_wolfe(
+            #@time s, v, primal, dual_gap = FrankWolfe.blended_conditional_gradient(
+            #@time s, v, primal, dual_gap = FrankWolfe.lazified_conditional_gradient(
+                (s, p) -> func(s, p),
+                (storage, s, p) -> grad_s!(storage, s, p),
+                (storage, s, p) -> grad_p!(storage, s, p),
+                lmo_s,
+                lmo_p,
+                s0,
+                p0,
+                ;fw_arguments...
+            )
+            # reset adaptive step size if necessary
+            if fw_arguments.line_search isa FrankWolfe.MonotonousNonConvexStepSize
+                fw_arguments.line_search.factor = 0
+            end
+
+            iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim)
+
+            success += iter_success
+            norm_sum += iter_norm
+
+            # Store single rate result
+            all_s[indexin(rate, rates)[1], :] = s
+            # rde.store_single_result(s, idx, fname, rate)
+            rde.store_s(s, fname, rate, d, test_name)
+            rde.store_single_result(p, "p", fname, rate, d, test_name)
+            rde.store_pert_img(x, s, p, fname, rate, d, test_name, optim)
+        end
+
+        if save_imp
+            rde.store_saliency_importance(all_s, rates, fname, d, test_name)
+        end
+
+        # Store multiple rate results
+    #     rde.store_collected_results(all_s, idx, node, pred, fname, rates)
+
     end
 
-    function grad_s!(storage, s, p)
-        if !(s isa Vector{eltype(x)})
-            s = convert(Vector{eltype(x)}, s)
-        end
-        if !(p isa Vector{eltype(x)})
-            p = convert(Vector{eltype(x)}, p)
-        end
-        g = df_s(s, p)
-        return @. storage = g
-    end
+    acc = success / length(indices)
+    norm_avg = norm_sum / length(indices)
+    println("\naccuracy: $acc | avg L1 norm: $norm_avg")
 
-    function grad_p!(storage, s, p)
-        if !(s isa Vector{eltype(x)})
-            s = convert(Vector{eltype(x)}, s)
-        end
-        if !(p isa Vector{eltype(x)})
-            p = convert(Vector{eltype(x)}, p)
-        end
-        g = df_p(s, p)
-        return @. storage = g
-    end
-
-    all_s = zeros(eltype(x), (length(rates), length(x)))
-
-    # rates = [50, 100, 150, 200, 250, 300, 350, 400, 1000, 2000]
-
-    for rate in rates
-        print("\nrate: ")
-        print(rate)
-        print("\n")
-        # Run FrankWolfe
-        println("Running sample $idx with rate $rate")
-
-        s0 = similar(x[:])
-        s0 .= 0.0
-        lmo_s = NonNegKSparseLMO(rate, 1.0)
-
-        p0 = similar(x[:])
-        p0 .= 0.0
-        lmo_p = LpNormLMO{Float64,Inf}(d)
-
-        @time s, v_s, p, v_p, primal, dual_gap_s, dual_gap_p  = FrankWolfe.frank_wolfe_2var(
-        #@time s, v, primal, dual_gap = FrankWolfe.frank_wolfe(
-        #@time s, v, primal, dual_gap = FrankWolfe.away_frank_wolfe(
-        #@time s, v, primal, dual_gap = FrankWolfe.blended_conditional_gradient(
-        #@time s, v, primal, dual_gap = FrankWolfe.lazified_conditional_gradient(
-            (s, p) -> func(s, p),
-            (storage, s, p) -> grad_s!(storage, s, p),
-            (storage, s, p) -> grad_p!(storage, s, p),
-            lmo_s,
-            lmo_p,
-            s0,
-            p0,
-            ;fw_arguments...
-        )
-        # reset adaptive step size if necessary
-        if fw_arguments.line_search isa FrankWolfe.MonotonousNonConvexStepSize
-            fw_arguments.line_search.factor = 0
-        end
-
-        iter_success, iter_norm = rde.get_model_prediction(x, s, p, node, target_node, mode, optim)
-
-        global success += iter_success
-        global norm_sum += iter_norm
-
-        # Store single rate result
-        all_s[indexin(rate, rates)[1], :] = s
-        # rde.store_single_result(s, idx, fname, rate)
-        rde.store_s(s, fname, rate, d, test_name)
-        rde.store_single_result(p, "p", fname, rate, d, test_name)
-        rde.store_pert_img(x, s, p, fname, rate, d, test_name, optim)
-    end
-
-    if save_imp
-        rde.store_saliency_importance(all_s, rates, fname, d, test_name)
-    end
-
-    # Store multiple rate results
-#     rde.store_collected_results(all_s, idx, node, pred, fname, rates)
+    acc_li[d_idx] = acc
+    norm_li[d_idx] = norm_avg
 
 end
 
-success = success / length(indices)
-norm_avg = norm_sum / length(indices)
-println("\naccuracy: $success | avg L1 norm: $norm_avg")
+if save_normacc_graph
+    rde.save_norm_acc(norm_li, acc_li, d_range, test_name)
+end
+
+
