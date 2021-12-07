@@ -16,6 +16,7 @@ config.gpu_options.allow_growth = True
 MODE = 'joint_untargeted'
 
 IMG_SHAPE = [32,32,3]
+labels = ['airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck']
 
 # LOAD MODEL
 model = cifar10vgg()
@@ -24,9 +25,11 @@ generator = instances.load_generator()
 
 
 def get_data_sample(index):
+    # print(generator.filenames[index])
     return (
         generator[index],
         os.path.splitext(os.path.split(generator.filenames[index])[1])[0],
+        os.path.split(generator.filenames[index])[0]
     )
 
 
@@ -79,7 +82,7 @@ def store_s(s, fname, rate, d, test_name):
     )
 
 
-def store_pert_img(x, s, p, fname, rate, d, test_name, optim):
+def store_pert_img(x, s, p, fname, rate, d, test_name, optim, true_cl=None, clean_lab=None, target_lab=None, pert_lab=None):
     if rate == 0:
         savedir = os.path.join('results', test_name, fname)
     else:
@@ -115,6 +118,14 @@ def store_pert_img(x, s, p, fname, rate, d, test_name, optim):
         vmax=np.max(pert_x),
         format='jpg',
     )
+
+    if true_cl is not None:
+        with open(os.path.join(savedir, f'prediction-log-rate-{rate}_d-{d}.txt') , 'w') as f:
+            f.write("True label: " + true_cl)
+            f.write("\nModel prediction on clean image: " + labels[clean_lab])
+            f.write("\nTarget label: "+ labels[target_lab])
+            f.write("\nModel prediction on perturbed image: " + labels[pert_lab])
+
 
 
 def store_saliency_importance(joint_s, rates, fname, d, test_name):
@@ -162,7 +173,8 @@ def get_distortion(x, model=model, mode=MODE, optim="joint"):
     out = model.model(network_input)
     if mode == 'untargeted':
         target_node = None
-        loss = tf.squeeze(out[..., node])
+        # loss = tf.squeeze(out[..., node])
+        print(loss)
     elif mode == 'targeted':
         class_li = list(range(10))
         class_li.remove(node)
@@ -175,8 +187,16 @@ def get_distortion(x, model=model, mode=MODE, optim="joint"):
         class_li.remove(node)
         new_class = random.randint(0, 8)
         target_node = class_li[new_class]
-        cel = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        loss = cel([target_node], out)
+        tl_onehot = tf.expand_dims(tf.one_hot(target_node, 10),0)
+        # print(out)
+        # print(tl_onehot)
+        target_prob = tf.reduce_sum((tl_onehot*out), 1)
+        # other = tf.reduce_max((1-tl_onehot)*out - (tl_onehot*1000), 1)
+        other = tf.reduce_max((1-tl_onehot)*out, 1)
+        confidence = 0.0
+        # loss = tf.squeeze(tf.maximum(-1.0, other-target_prob+confidence))
+        loss = tf.squeeze(other-target_prob+confidence)
+        # print(loss)
     else:
         raise Exception("mode not implemented")
 
@@ -224,14 +244,13 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim, pred1, logfnam
 
     # pred0_logit = pred0[..., node0]
     # pred1_logit = pred1[..., node0]
-    labels = ['airplane','automobile','bird','cat','deer','dog','frog','horse','ship','truck']
 
     with tf.Session() as sess:
         print('\n------------------------\n')
-        print(f'orig pred {labels[node0]}: {node0} | ',
+        print(f'orig pred: {labels[node0]} ({node0}) | ',
               f'orig pred: {pred0_percent.eval()}% | ',
-              f'pert target {labels[target_node]}: {target_node} | ',
-              f'pert pred {labels[node1]}: {node1} | ',
+              f'pert target: {labels[target_node]} ({target_node}) | ',
+              f'pert pred: {labels[node1]} ({node1}) | ',
               f'pert pred new class: {pred1_new_class_percent.eval()}% | ',
               f'pert pred old class: {pred1_old_class_percent.eval()}% | ',
               )
@@ -246,9 +265,9 @@ def get_model_prediction(x, s, p, node, target_node, mode, optim, pred1, logfnam
             f.write(f"\npert pred old class: {pred1_old_class_percent.eval()}% \n")
 
     if mode == 'untargeted':
-        return int(node0 != node1), norm
-    elif mode == 'targeted':
-        return int(target_node == node1), norm
+        return int(node0 != node1), norm, node1
+    elif mode == 'targeted' or 'targeted-cw':
+        return int(target_node == node1), norm, node1
     else:
         return 0, norm
 
